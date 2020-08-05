@@ -1,3 +1,4 @@
+import os
 import base64
 import requests
 
@@ -11,22 +12,23 @@ class JunoClient():
     """
     def __init__(self, baseurl, client_id, client_secret):
         self.credentials = base64.b64encode(
-            f'{client_id}:{client_secret}'.encode('utf-8'))
+            f'{client_id}:{client_secret}'.encode('ascii')
+        ).decode('ascii')
         self.baseurl = baseurl
         self.auth = {}
 
-    def _request_token(self, *args, **kwargs):
+    def _request_token(self):
         """
         https://dev.juno.com.br/api/v2#tag/Autorizacao
         """
         headers = {
-            'Content-Type': 'application/json;charset=UTF-8',
-            f'Authorization: Basic {self.credentials}'
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': f'Basic {self.credentials}'
         }
         data = {'grant_type': 'client_credentials'}
         response = requests.post(
-            os.path.join(self.baseurl, '/authorization-server/oauth/token'),
-            headers=headers, data=payload)
+            os.path.join(self.baseurl, 'authorization-server/oauth/token'),
+            headers=headers, data=data)
         return response
 
     def _authenticated(self):
